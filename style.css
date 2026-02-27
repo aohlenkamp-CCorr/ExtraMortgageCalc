@@ -1,11 +1,15 @@
 :root {
-    --bg-color: #f4f7f6;
+    /* Color Palette extracted from your logo */
+    --bg-color: #f7f9f8; 
     --panel-bg: #ffffff;
-    --text-main: #2d3748;
-    --text-muted: #718096;
-    --accent-color: #3182ce;
-    --success-color: #38a169;
+    --text-main: #2b3931; /* Dark Slate */
+    --text-muted: #6b7a70;
+    --accent-color: #6d8c74; /* Sage Green */
+    --accent-hover: #5a7561;
+    --highlight-color: #c97140; /* Burnt Orange */
+    --success-color: #2f855a;
     --border-color: #e2e8f0;
+    --header-bg: #ffffff;
 }
 
 body {
@@ -13,67 +17,125 @@ body {
     background-color: var(--bg-color);
     color: var(--text-main);
     margin: 0;
-    padding: 20px;
+    padding: 0;
+}
+
+/* --- WordPress Theme Header --- */
+.site-header {
+    background: var(--header-bg);
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    margin-bottom: 30px;
+}
+
+.header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.site-logo {
+    height: 85px;
+    width: 85px;
+    border-radius: 50%;
+    object-fit: contain;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+.site-title-group h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--text-main);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.site-tagline {
+    margin: 5px 0 0 0;
+    color: var(--accent-color);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+}
+
+/* --- Main Layout --- */
+.page-wrapper {
+    padding: 0 20px 40px 20px;
 }
 
 .dashboard-container {
     display: grid;
     grid-template-columns: 350px 1fr;
-    gap: 20px;
+    gap: 25px;
     max-width: 1400px;
     margin: 0 auto;
 }
 
 .input-panel, .results-panel {
     background: var(--panel-bg);
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    padding: 30px;
+    border-radius: 8px; /* Sharper corners for a cleaner theme look */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+    border: 1px solid var(--border-color);
 }
 
 h2 {
     margin-top: 0;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     color: var(--text-main);
+    border-bottom: 2px solid var(--bg-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
+    margin-bottom: 6px;
+    font-weight: 600;
     font-size: 0.9rem;
+    color: var(--text-main);
 }
 
 input, select {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
+    padding: 12px;
+    margin-bottom: 18px;
     border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-radius: 4px;
     box-sizing: border-box;
+    font-size: 1rem;
+    color: var(--text-main);
 }
 
 hr {
     border: 0;
     border-top: 1px solid var(--border-color);
-    margin: 20px 0;
+    margin: 25px 0;
 }
 
+/* --- Buttons --- */
 .primary-btn {
     width: 100%;
     background-color: var(--accent-color);
     color: white;
     border: none;
-    padding: 12px;
-    border-radius: 6px;
+    padding: 14px;
+    border-radius: 4px;
     font-weight: bold;
+    font-size: 1rem;
     cursor: pointer;
     margin-top: 10px;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s ease;
 }
 
 .primary-btn:hover {
-    background-color: #2b6cb0;
+    background-color: var(--accent-hover);
 }
 
 #add-extra-btn {
@@ -81,48 +143,58 @@ hr {
     background-color: transparent;
     color: var(--accent-color);
     border: 2px dashed var(--accent-color);
-    padding: 10px;
-    border-radius: 6px;
+    padding: 12px;
+    border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
     margin-bottom: 20px;
+    transition: all 0.2s ease;
 }
 
+#add-extra-btn:hover {
+    background-color: var(--bg-color);
+}
+
+/* --- Dashboard Summary Cards --- */
 .summary-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 15px;
-    margin-bottom: 25px;
+    margin-bottom: 30px;
 }
 
 .card {
     background: var(--bg-color);
-    padding: 15px;
-    border-radius: 8px;
+    padding: 20px 15px;
+    border-radius: 6px;
     text-align: center;
     border: 1px solid var(--border-color);
 }
 
 .card h3 {
     margin: 0 0 10px 0;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     color: var(--text-muted);
 }
 
 .card p {
     margin: 0;
-    font-size: 1.25rem;
-    font-weight: bold;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-main);
 }
 
 .card.highlight {
-    background: var(--accent-color);
+    background: var(--highlight-color);
     color: white;
-    border-color: var(--accent-color);
+    border-color: var(--highlight-color);
+    box-shadow: 0 4px 10px rgba(201, 113, 64, 0.2);
 }
 
-.card.highlight h3 {
-    color: #ebf8ff;
+.card.highlight h3, .card.highlight p {
+    color: #ffffff;
 }
 
 .card.equity-card {
@@ -134,6 +206,7 @@ hr {
     color: var(--success-color);
 }
 
+/* --- Table Styles --- */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -141,7 +214,7 @@ table {
 }
 
 th, td {
-    padding: 12px;
+    padding: 14px 12px;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -149,18 +222,20 @@ th {
     background-color: var(--bg-color);
     font-weight: 600;
     font-size: 0.9rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-/* Accordion Table Styles */
 .year-summary-row {
-    background-color: #edf2f7;
-    font-weight: bold;
+    background-color: #f8faf9;
+    font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
 .year-summary-row:hover {
-    background-color: #e2e8f0;
+    background-color: #edf2f0;
 }
 
 .month-detail-row {
@@ -171,7 +246,7 @@ th {
 
 .month-detail-row td {
     color: var(--text-muted);
-    padding-left: 20px;
+    padding-left: 25px;
 }
 
 .month-detail-row.show-row {
@@ -180,9 +255,10 @@ th {
 
 .expand-icon {
     display: inline-block;
-    width: 15px;
+    width: 20px;
     font-size: 0.8rem;
     transition: transform 0.2s;
+    color: var(--accent-color);
 }
 
 .expanded .expand-icon {
