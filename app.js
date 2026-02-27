@@ -51,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
             let principalForMonth = standardPayment - interestForMonth;
             let appliedExtra = 0;
 
-            // Apply active extra payment rules
             extraRules.forEach(rule => {
                 let ruleDate = new Date(rule.start);
                 ruleDate = new Date(ruleDate.getUTCFullYear(), ruleDate.getUTCMonth(), 1);
@@ -65,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Handle final payment to not overpay
             if (balance < (principalForMonth + appliedExtra)) {
                 principalForMonth = balance;
                 appliedExtra = 0;
@@ -74,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
             balance -= (principalForMonth + appliedExtra);
             totalInterest += interestForMonth;
             
-            // Appreciate Home Value
             currentHomeValue += (currentHomeValue * monthlyAppreciation);
             let currentEquity = currentHomeValue - (balance > 0 ? balance : 0);
 
@@ -122,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseline = calculateSchedule(principal, rate, years, startDateStr, homeValue, appreciation, []);
         const actual = calculateSchedule(principal, rate, years, startDateStr, homeValue, appreciation, extraRules);
 
-        // --- Update Summary Cards ---
+        // Update Summary Cards
         const formatOptions = { year: 'numeric', month: 'short' };
         document.getElementById('summary-orig-date').innerText = baseline.payoffDate.toLocaleDateString(undefined, formatOptions);
         document.getElementById('summary-new-date').innerText = actual.payoffDate.toLocaleDateString(undefined, formatOptions);
@@ -131,17 +128,18 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('summary-savings').innerText = `$${savings.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         document.getElementById('summary-equity').innerText = `$${actual.finalEquity.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
 
-        // --- Populate Expandable Table ---
+        // Populate Expandable Table Using Bulletproof DOM Elements
         const tbody = document.querySelector('#amortization-table tbody');
         tbody.innerHTML = ''; 
         
         let currentYear = null;
         let yearTotals = { principal: 0, interest: 0, extra: 0, payments: 0 };
-        let monthRowsHtml = '';
+        let currentMonthData = [];
 
-        const appendYearGroup = (year, totals, finalBalance, finalEquity, monthsHtml) => {
+        const flushYearGroup = (year, totals, finalBalance, finalEquity, monthData) => {
+            // 1. Create the summary row
             const yearRow = document.createElement('tr');
-            yearRow.classList.add('year-summary-row');
+            yearRow.className = 'year-summary-row';
             yearRow.innerHTML = `
                 <td><span class="expand-icon">▶</span> ${year}</td>
                 <td>$${totals.payments.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -153,29 +151,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>$${finalBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 <td style="color: var(--success-color)">$${finalEquity.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
             `;
+            tbody.appendChild(yearRow);
 
-            const monthWrapper = document.createElement('tbody');
-            monthWrapper.innerHTML = monthsHtml;
-            const monthElements = Array.from(monthWrapper.children);
-
-            yearRow.addEventListener('click', () => {
-                yearRow.classList.toggle('expanded');
-                monthElements.forEach(row => row.classList.toggle('show-row'));
+            // 2. Create the hidden month rows
+            const monthElements = [];
+            monthData.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.className = 'month-detail-row';
+                tr.innerHTML = `
+                    <td>${m.date.toLocaleDateString(undefined, formatOptions)}</td>
+                    <td>$${m.payment.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>$${m.principal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>$${m.interest.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>$${m.extra.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>$${m.balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>$${m.equity.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+                `;
+                tbody.appendChild(tr);
+                monthElements.push(tr);
             });
 
-            tbody.appendChild(yearRow);
-            monthElements.forEach(row => tbody.appendChild(row));
+            // 3. Add the click listener
+            yearRow.addEventListener('click', () => {
+                yearRow.classList.toggle('expanded');
+                monthElements.forEach(el => el.classList.toggle('show-row'));
+            });
         };
 
         actual.schedule.forEach((row, index) => {
             let rowYear = row.date.getFullYear();
 
+            // When the year changes, flush the previous year's data to the table
             if (currentYear !== null && currentYear !== rowYear) {
                 let prevRow = actual.schedule[index - 1];
-                appendYearGroup(currentYear, yearTotals, prevRow.balance, prevRow.equity, monthRowsHtml);
+                flushYearGroup(currentYear, yearTotals, prevRow.balance, prevRow.equity, currentMonthData);
                 
+                // Reset for the new year
                 yearTotals = { principal: 0, interest: 0, extra: 0, payments: 0 };
-                monthRowsHtml = '';
+                currentMonthData = [];
             }
 
             currentYear = rowYear;
@@ -183,21 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
             yearTotals.principal += row.principal;
             yearTotals.interest += row.interest;
             yearTotals.extra += row.extra;
+            currentMonthData.push(row);
 
-            monthRowsHtml += `
-                <tr class="month-detail-row">
-                    <td>${row.date.toLocaleDateString(undefined, formatOptions)}</td>
-                    <td>$${row.payment.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td>$${row.principal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td>$${row.interest.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td>$${row.extra.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td>$${row.balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td>$${row.equity.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
-                </tr>
-            `;
-
+            // If it's the absolute last payment, flush the final year
             if (index === actual.schedule.length - 1) {
-                appendYearGroup(currentYear, yearTotals, row.balance, row.equity, monthRowsHtml);
+                flushYearGroup(currentYear, yearTotals, row.balance, row.equity, currentMonthData);
             }
         });
     });
